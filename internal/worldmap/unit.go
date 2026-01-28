@@ -8,4 +8,5 @@ type Unit interface {
 	GetCoord() *geo.Coord      // 获取unit坐标
 	SetCoord(coord *geo.Coord) // 设置unit坐标
 	GetType() MapUnitType      // 获取unit类型
+	GetOwner() *Owner          // 获取unit所属者
 }
