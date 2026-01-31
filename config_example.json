@@ -1,0 +1,245 @@
+{
+  "map_config_example": {
+    "description": "SLG地图资源配置示例 - 包含资源刷新策略、障碍物配置和位置配置",
+    
+    "global_refresh_config": {
+      "daily_refresh_time": "04:00",
+      "weekly_refresh_day": 1,
+      "monthly_refresh_day": 1,
+      "enable_dynamic_balance": true,
+      "min_resource_ratio": 0.3,
+      "max_resource_ratio": 0.8,
+      "player_based_refresh": true,
+      "players_per_resource": 10,
+      "max_refresh_distance": 500,
+      "max_refresh_per_tick": 50,
+      "refresh_tick_interval": 60
+    },
+    
+    "resource_zones": [
+      {
+        "zone_id": 1,
+        "zone_name": "北部森林",
+        "zone_type": "forest",
+        "min_x": 0,
+        "min_y": 0,
+        "max_x": 1000,
+        "max_y": 1000,
+        "resource_types": ["wood", "herb", "food"],
+        "density": 0.7,
+        "min_distance": 50,
+        "max_points": 20,
+        "refresh_enabled": true,
+        "refresh_rate": 5.0,
+        "max_concurrent": 15
+      },
+      {
+        "zone_id": 2,
+        "zone_name": "南部矿山",
+        "zone_type": "mountain",
+        "min_x": 0,
+        "min_y": 1500,
+        "max_x": 1000,
+        "max_y": 2500,
+        "resource_types": ["stone", "ore", "crystal"],
+        "density": 0.5,
+        "min_distance": 100,
+        "max_points": 15,
+        "refresh_enabled": true,
+        "refresh_rate": 3.0,
+        "max_concurrent": 10
+      }
+    ],
+    
+    "enhanced_resource_points": [
+      {
+        "point_id": 1001,
+        "x": 300,
+        "y": 300,
+        "resource_type": "gold",
+        "point_type": "fixed",
+        "refresh_strategy": "linear",
+        "max_amount": 5000,
+        "current_amount": 5000,
+        "regen_rate": 2.5,
+        "regen_delay": 600,
+        "spawn_radius": 0,
+        "spawn_interval": 0,
+        "spawn_chance": 1.0,
+        "active_hours": [0, 23],
+        "season_months": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
+        "trigger_event_id": 0,
+        "despawn_after": 0,
+        "min_player_level": 1,
+        "max_player_level": 0,
+        "faction_restrict": ""
+      }
+    ],
+    
+    "obstacles": [
+      {
+        "obstacle_id": 2001,
+        "x": 500,
+        "y": 500,
+        "width": 200,
+        "height": 200,
+        "obstacle_type": "mountain",
+        "name": "中央高山",
+        "block_building": true,
+        "block_resource": true,
+        "block_monster": true,
+        "allow_march": true,
+        "building_radius": 100,
+        "resource_radius": 80,
+        "monster_radius": 80,
+        "visual_effect": "mountain_fog",
+        "minimap_icon": "mountain_icon",
+        "description": "中央区域的高山，阻挡建筑和资源刷新，但允许行军通过",
+        "special_effects": ["fog", "slow_movement"],
+        "effect_strength": 0.3
+      },
+      {
+        "obstacle_id": 2002,
+        "x": 1200,
+        "y": 800,
+        "width": 300,
+        "height": 150,
+        "obstacle_type": "lake",
+        "name": "月光湖",
+        "block_building": true,
+        "block_resource": false,
+        "block_monster": false,
+        "allow_march": true,
+        "building_radius": 50,
+        "resource_radius": 0,
+        "monster_radius": 0,
+        "visual_effect": "water_reflection",
+        "minimap_icon": "lake_icon",
+        "description": "美丽的湖泊，不能建造建筑，但可以刷新渔产资源",
+        "special_effects": ["water_aura", "healing"],
+        "effect_strength": 0.5
+      },
+      {
+        "obstacle_id": 2003,
+        "x": 800,
+        "y": 1800,
+        "width": 400,
+        "height": 400,
+        "obstacle_type": "forest",
+        "name": "迷雾森林",
+        "block_building": true,
+        "block_resource": false,
+        "block_monster": false,
+        "allow_march": true,
+        "building_radius": 60,
+        "resource_radius": 0,
+        "monster_radius": 0,
+        "visual_effect": "forest_fog",
+        "minimap_icon": "forest_icon",
+        "description": "密集的森林，阻挡建筑但可以刷新木材和草药",
+        "special_effects": ["fog", "reduced_vision"],
+        "effect_strength": 0.4
+      }
+    ],
+    
+    "obstacle_zones": [
+      {
+        "zone_id": 1,
+        "zone_name": "西部山脉区域",
+        "obstacle_type": "mountain",
+        "min_x": 0,
+        "min_y": 1000,
+        "max_x": 800,
+        "max_y": 2000,
+        "density": 0.6,
+        "min_size": 100,
+        "max_size": 300,
+        "min_distance": 150,
+        "block_building": true,
+        "block_resource": true,
+        "block_monster": true,
+        "allow_march": true,
+        "terrain_effects": {
+          "movement_speed": 0.7,
+          "vision_range": 0.8,
+          "stamina_consumption": 1.2
+        }
+      },
+      {
+        "zone_id": 2,
+        "zone_name": "东部河流区域",
+        "obstacle_type": "river",
+        "min_x": 1200,
+        "min_y": 0,
+        "max_x": 2000,
+        "max_y": 1500,
+        "density": 0.4,
+        "min_size": 50,
+        "max_size": 150,
+        "min_distance": 100,
+        "block_building": true,
+        "block_resource": false,
+        "block_monster": false,
+        "allow_march": true,
+        "terrain_effects": {
+          "movement_speed": 0.9,
+          "water_restoration": 1.5
+        }
+      }
+    ],
+    
+    "legacy_resource_points": [
+      {
+        "point_id": 1,
+        "x": 400,
+        "y": 400,
+        "resource_type": "wood",
+        "max_amount": 1000,
+        "regen_rate": 1.0,
+        "regen_delay": 300
+      }
+    ]
+  },
+  
+  "configuration_explanations": {
+    "obstacle_types": {
+      "mountain": "高山 - 阻挡建筑、资源和怪物刷新，通常允许行军通过但速度减慢",
+      "lake": "湖泊 - 阻挡建筑，但可以刷新渔产资源，通常有恢复效果",
+      "forest": "森林 - 阻挡建筑，可以刷新木材和草药，减少视野范围",
+      "swamp": "沼泽 - 阻挡建筑和资源，大幅减慢行军速度",
+      "cliff": "悬崖 - 完全阻挡行军和建筑，可能作为地图边界",
+      "river": "河流 - 阻挡建筑，不影响资源，轻微影响行军速度",
+      "volcano": "火山 - 阻挡建筑和资源，对周围单位造成持续伤害",
+      "desert": "沙漠 - 特殊地形，影响资源分布和行军速度",
+      "ruins": "废墟 - 古代遗迹，可能隐藏特殊资源或事件"
+    },
+    
+    "obstacle_effects": {
+      "block_building": "是否阻挡建筑摆放 - true表示不能在该区域建造建筑",
+      "block_resource": "是否阻挡资源刷新 - true表示不能在该区域刷新资源点",
+      "block_monster": "是否阻挡怪物刷新 - true表示不能在该区域刷新怪物",
+      "allow_march": "是否允许行军通过 - true表示部队可以通过该区域",
+      "building_radius": "建筑阻挡半径 - 障碍物周围多少距离内不能建造建筑",
+      "resource_radius": "资源阻挡半径 - 障碍物周围多少距离内不能刷新资源",
+      "monster_radius": "怪物阻挡半径 - 障碍物周围多少距离内不能刷新怪物"
+    },
+    
+    "terrain_effects_examples": {
+      "movement_speed": "移动速度乘数 - 1.0为正常，0.7表示减速30%",
+      "vision_range": "视野范围乘数 - 1.0为正常，0.8表示视野减少20%",
+      "stamina_consumption": "体力消耗乘数 - 1.0为正常，1.2表示消耗增加20%",
+      "water_restoration": "水分恢复乘数 - 1.0为正常，1.5表示恢复增加50%",
+      "healing": "治疗效果 - 正值表示持续恢复生命值"
+    },
+    
+    "configuration_tips": [
+      "1. 高山适合作为地图的自然屏障，配置较大的阻挡半径",
+      "2. 湖泊和森林可以设计为资源富集区，只阻挡建筑不阻挡资源",
+      "3. 河流可以作为地图的分界线，轻微影响行军但不完全阻挡",
+      "4. 障碍物区域适合创建大片连续的特殊地形，如山脉、森林等",
+      "5. 特殊效果可以增加游戏策略性，如火山区域的持续伤害",
+      "6. 考虑障碍物对游戏平衡的影响，避免过多阻挡导致玩家体验下降",
+      "7. 障碍物配置应与资源刷新策略协调，创建合理的游戏世界"
+    ]
+  }
+}

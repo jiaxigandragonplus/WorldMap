@@ -23,3 +23,16 @@ func NewUnionOwner(id int64) *Owner {
 func NewNpcOwner(id int64) *Owner {
 	return NewOwner(id, OwnerType_Npc)
 }
+
+func (w *Owner) GetRelation(other Owner) Relation {
+	if other.Id == w.Id {
+		return Relation_Self
+	}
+
+	if w.Type == OwnerType_Union && other.Type == OwnerType_Union &&
+		other.Id == w.Id {
+		return Relation_Union
+	}
+
+	return Relation_Enemy
+}
