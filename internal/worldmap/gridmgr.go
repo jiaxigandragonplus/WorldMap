@@ -97,3 +97,35 @@ func (gm *GridManager) CleanupEmptyGrids() {
 		}
 	}
 }
+
+func (mgr *GridManager) AddUnit(unit Unit) {
+	grid := mgr.GetGridByCoord(unit.GetCoord())
+	if grid != nil {
+		grid.AddUnit(unit)
+	}
+}
+
+func (mgr *GridManager) RemoveUnit(unit Unit) {
+	grid := mgr.GetGridByCoord(unit.GetCoord())
+	if grid != nil {
+		grid.RemoveUnit(unit)
+	}
+}
+
+// 更新地图单位的位置
+func (mgr *GridManager) UpdateInitCoord(unit Unit, coord *geo.Coord) {
+	oldGrid := mgr.GetGridByCoord(unit.GetCoord())
+	newGrid := mgr.GetGridByCoord(coord)
+	unit.SetCoord(coord)
+
+	if oldGrid != nil && newGrid != nil && oldGrid == newGrid {
+		return
+	}
+
+	if oldGrid != nil {
+		oldGrid.RemoveUnit(unit)
+	}
+	if newGrid != nil {
+		newGrid.AddUnit(unit)
+	}
+}
