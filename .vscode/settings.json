@@ -1,0 +1,18 @@
+{
+    "files.exclude": {
+        "**/*.js.map": true,
+        "**/*.js": { "when": "$(basename).ts"}
+    },
+    "workbench.editor.enablePreview": true,
+    "workbench.editor.showTabs": "multiple",
+    "go.testFlags": ["-count=1"],
+    "go.coverageDecorator": "none",
+    "dlvLoadConfig": {
+        "followPointers": true,
+        "maxVariableRecurse": 1,
+        "maxStringLen": 1024, //字符串最大长度
+        "maxArrayValues": 64,
+        "maxStructFields": -1
+    },
+    "dotnet.defaultSolution": "disable"
+}

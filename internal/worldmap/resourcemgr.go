@@ -14,7 +14,6 @@ type ResourceManager struct {
 	resourceZones   map[int32]*config.ResourceZoneConfig // 资源区域ID -> 配置
 	globalConfig    *config.GlobalRefreshConfig
 	lastRefreshTime time.Time
-	nextResourceId  int64
 	gridMgr         *GridManager
 	obstacleMgr     *ObstacleManager // 障碍物管理器
 }
@@ -26,7 +25,6 @@ func NewResourceManager(gridMgr *GridManager, obstacleMgr *ObstacleManager, glob
 		resourceZones:   make(map[int32]*config.ResourceZoneConfig),
 		globalConfig:    globalConfig,
 		lastRefreshTime: time.Now(),
-		nextResourceId:  1000,
 		gridMgr:         gridMgr,
 		obstacleMgr:     obstacleMgr,
 	}
@@ -37,9 +35,12 @@ func (rm *ResourceManager) LoadConfig(mapConfig *config.MapConfig) {
 	// 加载增强资源点
 	for _, pointConfig := range mapConfig.EnhancedResourcePoints {
 		coord := geo.Coord{X: pointConfig.X, Y: pointConfig.Y}
-		resource := NewResourceUnit(rm.nextResourceId, pointConfig.PointID, coord, &pointConfig)
-		rm.resources[rm.nextResourceId] = resource
-		rm.nextResourceId++
+		resource, err := NewResourceUnitWithGeneratedID(pointConfig.PointID, coord, &pointConfig)
+		if err != nil {
+			// 如果ID生成失败，使用配置ID作为回退（不推荐，但保证功能）
+			resource = NewResourceUnit(int64(pointConfig.PointID), pointConfig.PointID, coord, &pointConfig)
+		}
+		rm.resources[resource.GetId()] = resource
 
 		// 将资源单位添加到网格
 		if grid := rm.gridMgr.GetGridByCoord(&coord); grid != nil {
@@ -71,9 +72,12 @@ func (rm *ResourceManager) LoadConfig(mapConfig *config.MapConfig) {
 		}
 
 		coord := geo.Coord{X: oldPoint.X, Y: oldPoint.Y}
-		resource := NewResourceUnit(rm.nextResourceId, oldPoint.PointID, coord, &enhancedConfig)
-		rm.resources[rm.nextResourceId] = resource
-		rm.nextResourceId++
+		resource, err := NewResourceUnitWithGeneratedID(oldPoint.PointID, coord, &enhancedConfig)
+		if err != nil {
+			// 如果ID生成失败，使用配置ID作为回退
+			resource = NewResourceUnit(int64(oldPoint.PointID), oldPoint.PointID, coord, &enhancedConfig)
+		}
+		rm.resources[resource.GetId()] = resource
 
 		if grid := rm.gridMgr.GetGridByCoord(&coord); grid != nil {
 			grid.AddUnit(resource)
@@ -213,7 +217,7 @@ func (rm *ResourceManager) spawnResourceInZone(zoneConfig *config.ResourceZoneCo
 
 		// 创建资源点配置
 		config := config.EnhancedResourcePointConfig{
-			PointID:         int32(rm.nextResourceId),
+			PointID:         0, // 临时值，将在创建资源点时使用生成的ID
 			X:               x,
 			Y:               y,
 			ResourceType:    resourceType,
@@ -229,9 +233,15 @@ func (rm *ResourceManager) spawnResourceInZone(zoneConfig *config.ResourceZoneCo
 		}
 
 		coord := geo.Coord{X: x, Y: y}
-		resource := NewResourceUnit(rm.nextResourceId, config.PointID, coord, &config)
-		rm.resources[rm.nextResourceId] = resource
-		rm.nextResourceId++
+		resource, err := NewResourceUnitWithGeneratedID(0, coord, &config)
+		if err != nil {
+			// 如果ID生成失败，跳过这个资源点
+			continue
+		}
+
+		// 更新配置中的PointID为生成的ID（转换为int32）
+		config.PointID = int32(resource.GetId())
+		rm.resources[resource.GetId()] = resource
 
 		// 添加到网格
 		if grid := rm.gridMgr.GetGridByCoord(&coord); grid != nil {

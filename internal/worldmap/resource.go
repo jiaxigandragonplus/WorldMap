@@ -20,7 +20,7 @@ type ResourceUnit struct {
 	isActive        bool
 }
 
-// NewResourceUnit 创建新的资源点单位
+// NewResourceUnit 创建新的资源点单位（指定ID）
 func NewResourceUnit(id int64, configId int32, coord geo.Coord, config *config.EnhancedResourcePointConfig) *ResourceUnit {
 	return &ResourceUnit{
 		id:              id,
@@ -33,6 +33,26 @@ func NewResourceUnit(id int64, configId int32, coord geo.Coord, config *config.E
 		lastHarvestTime: time.Now(),
 		lastRefreshTime: time.Now(),
 	}
+}
+
+// NewResourceUnitWithGeneratedID 创建新的资源点单位（自动生成ID）
+func NewResourceUnitWithGeneratedID(configId int32, coord geo.Coord, config *config.EnhancedResourcePointConfig) (*ResourceUnit, error) {
+	id, err := GenerateUnitID()
+	if err != nil {
+		return nil, err
+	}
+
+	return &ResourceUnit{
+		id:              id,
+		configId:        configId,
+		coord:           coord,
+		owner:           NewOwner(0, OwnerType_System), // 系统所有
+		config:          config,
+		currentAmount:   config.CurrentAmount,
+		isActive:        true,
+		lastHarvestTime: time.Now(),
+		lastRefreshTime: time.Now(),
+	}, nil
 }
 
 // GetId 获取单位ID
