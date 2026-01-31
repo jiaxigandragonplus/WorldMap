@@ -11,7 +11,7 @@ type WorldMapManager struct {
 
 func NewWorldMapManager(config *config.MapConfig) *WorldMapManager {
 	return &WorldMapManager{
-		gridMgr:   NewGridManager(config.Width, config.Height, config.XGridLen, config.YGridLen),
+		gridMgr:   NewGridManager(config.Width, config.Height, config.GridWidth, config.GridHeight),
 		unitMgr:   NewUnitManager(),
 		playerMgr: NewMapPlayerManager(),
 	}

@@ -26,8 +26,8 @@ type MapConfig struct {
 	MapName            string // 地图名称
 	Width              int32  // 地图宽度（世界单位）
 	Height             int32  // 地图高度（世界单位）
-	XGridLen           int32  // 横向网格数量
-	YGridLen           int32  // 纵向网格数量
+	GridWidth          int32  // grid宽度
+	GridHeight         int32  // grad高度
 	DefaultVisionRange int32  // 默认视野范围（网格数）
 	MaxPlayers         int32  // 最大玩家数量
 
