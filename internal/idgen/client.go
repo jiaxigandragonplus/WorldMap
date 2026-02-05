@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"io"
 	"net/http"
 	"strconv"
 	"time"
@@ -92,105 +91,6 @@ func (c *Client) GenerateIDs(count int) ([]int64, error) {
 	}
 
 	return result.IDs, nil
-}
-
-// GetStats 获取服务统计信息
-func (c *Client) GetStats() (*ServiceStats, error) {
-	url := c.baseURL + "/stats"
-
-	req, err := http.NewRequest("GET", url, nil)
-	if err != nil {
-		return nil, err
-	}
-
-	resp, err := c.httpClient.Do(req)
-	if err != nil {
-		return nil, err
-	}
-	defer resp.Body.Close()
-
-	if resp.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("server returned status: %d", resp.StatusCode)
-	}
-
-	var result struct {
-		Stats         ServiceStats `json:"stats"`
-		UptimeSeconds float64      `json:"uptime_seconds"`
-		UptimeHuman   string       `json:"uptime_human"`
-		MachineID     int64        `json:"machine_id"`
-	}
-
-	if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {
-		return nil, err
-	}
-
-	return &result.Stats, nil
-}
-
-// ParseID 解析ID
-func (c *Client) ParseID(id int64) (*ParsedID, error) {
-	url := c.baseURL + "/parse?id=" + strconv.FormatInt(id, 10)
-
-	req, err := http.NewRequest("GET", url, nil)
-	if err != nil {
-		return nil, err
-	}
-
-	resp, err := c.httpClient.Do(req)
-	if err != nil {
-		return nil, err
-	}
-	defer resp.Body.Close()
-
-	if resp.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("server returned status: %d", resp.StatusCode)
-	}
-
-	body, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return nil, err
-	}
-
-	var parsed ParsedID
-	if err := json.Unmarshal(body, &parsed); err != nil {
-		return nil, err
-	}
-
-	return &parsed, nil
-}
-
-// HealthCheck 检查服务健康状态
-func (c *Client) HealthCheck() error {
-	url := c.baseURL + "/health"
-
-	req, err := http.NewRequest("GET", url, nil)
-	if err != nil {
-		return err
-	}
-
-	resp, err := c.httpClient.Do(req)
-	if err != nil {
-		return err
-	}
-	defer resp.Body.Close()
-
-	if resp.StatusCode != http.StatusOK {
-		return fmt.Errorf("health check failed with status: %d", resp.StatusCode)
-	}
-
-	return nil
-}
-
-// ParsedID 解析后的ID信息
-type ParsedID struct {
-	ID             int64  `json:"id"`
-	Hex            string `json:"hex"`
-	Timestamp      int64  `json:"timestamp"`
-	MachineID      int64  `json:"machine_id"`
-	Sequence       int64  `json:"sequence"`
-	CreatedAt      string `json:"created_at"`
-	CreatedAtUnix  int64  `json:"created_at_unix"`
-	TimeSinceEpoch int64  `json:"time_since_epoch"`
 }
 
 // LocalGenerator 本地ID生成器（不依赖远程服务）
