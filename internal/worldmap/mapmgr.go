@@ -22,7 +22,7 @@ func (mm *MapManager) GetMap(mapID int64) *WorldMap {
 }
 
 func (mm *MapManager) CreateMap(mapConfig *config.MapConfig) *WorldMap {
-	mapID := int64(1)
+	mapID := GetIDGenerator().GenerateNewID()
 	mm.maps[mapID] = NewWorldMap(mapConfig)
 	return mm.maps[mapID]
 }
