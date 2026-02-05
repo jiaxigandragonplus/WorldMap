@@ -37,10 +37,7 @@ func NewResourceUnit(id int64, configId int32, coord geo.Coord, config *config.E
 
 // NewResourceUnitWithGeneratedID 创建新的资源点单位（自动生成ID）
 func NewResourceUnitWithGeneratedID(configId int32, coord geo.Coord, config *config.EnhancedResourcePointConfig) (*ResourceUnit, error) {
-	id, err := GenerateUnitID()
-	if err != nil {
-		return nil, err
-	}
+	id := GetIDGenerator().GenerateNewID()
 
 	return &ResourceUnit{
 		id:              id,
