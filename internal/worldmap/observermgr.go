@@ -18,6 +18,10 @@ func NewObserverManager(worldMap *WorldMap) *ObserverManager {
 	}
 }
 
+func (om *ObserverManager) GetObserver(id int64) *Observer {
+	return om.observers[id]
+}
+
 func (om *ObserverManager) AddObserver(playerId int64, viewWindow *geo.Rectangle, lod int32) *Observer {
 	observer := NewObserver(playerId, viewWindow, lod)
 	om.observers[observer.Id] = observer

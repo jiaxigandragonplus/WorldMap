@@ -1,6 +1,10 @@
 package geo
 
-import "math/rand"
+import (
+	"math/rand"
+
+	"github.com/GooLuck/WorldMap/internal/worldmap/config"
+)
 
 // 矩形
 type Rectangle struct {
@@ -38,4 +42,8 @@ func (r *Rectangle) Center() *Coord {
 // 判断两个矩形是否相交
 func (r *Rectangle) Intersects(other *Rectangle) bool {
 	return r.X < other.X+other.Width && r.X+r.Width > other.X && r.Y < other.Y+other.Height && r.Y+r.Height > other.Y
+}
+
+func RectToGrid(mapConfig *config.MapConfig, rect *Rectangle) (minGridX, maxGridX, minGridY, maxGridY int32) {
+	return
 }

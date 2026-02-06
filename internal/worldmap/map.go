@@ -7,11 +7,12 @@ import (
 
 // 世界地图
 type WorldMap struct {
-	id        int64             // 地图实例id
-	gridMgr   *GridManager      // 网格管理器
-	unitMgr   *UnitManager      // 单位管理器
-	playerMgr *MapPlayerManager // 玩家管理器
-	mapConfig *config.MapConfig // 地图配置
+	id          int64             // 地图实例id
+	mapConfig   *config.MapConfig // 地图配置
+	gridMgr     *GridManager      // 网格管理器
+	unitMgr     *UnitManager      // 单位管理器
+	playerMgr   *MapPlayerManager // 玩家管理器
+	observerMgr *ObserverManager  // 观察者管理器
 }
 
 type CityZoneArea struct {
@@ -21,12 +22,16 @@ type CityZoneArea struct {
 }
 
 func NewWorldMap(config *config.MapConfig) *WorldMap {
-	return &WorldMap{
+	newMap := &WorldMap{
+		id:        GetIDGenerator().GenerateNewID(),
+		mapConfig: config,
 		gridMgr:   NewGridManager(config.Width, config.Height, config.GridWidth, config.GridHeight),
 		unitMgr:   NewUnitManager(),
 		playerMgr: NewMapPlayerManager(),
-		mapConfig: config,
 	}
+
+	newMap.observerMgr = NewObserverManager(newMap)
+	return newMap
 }
 
 // 创建一个城市坐标
@@ -52,6 +57,10 @@ func (wm *WorldMap) NewNpcTroop(confId int32, level int32, coord *geo.Coord) Uni
 // 获取可见单位
 func (wm *WorldMap) GetVisibleUnits(playerId int64, rect *geo.Rectangle) map[int64]Unit {
 	retUnits := make(map[int64]Unit)
+	observer := wm.observerMgr.GetObserver(playerId)
+	if observer == nil {
+		return retUnits
+	}
 
 	return retUnits
 }

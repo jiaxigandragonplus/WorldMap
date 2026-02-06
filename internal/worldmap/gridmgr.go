@@ -129,3 +129,15 @@ func (mgr *GridManager) UpdateInitCoord(unit Unit, coord *geo.Coord) {
 		newGrid.AddUnit(unit)
 	}
 }
+
+// 获取矩形范围内的单位
+func (mgr *GridManager) GetRectUnits(rect *geo.Rectangle, align bool) []Unit {
+	retUnits := make([]Unit, 0)
+
+	return retUnits
+}
+
+// 遍历矩形范围内的单位
+func (mgr *GridManager) RangeRectUnits(rect *geo.Rectangle, align bool, callback func(unit Unit) bool) {
+
+}
