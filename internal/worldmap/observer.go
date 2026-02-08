@@ -23,5 +23,7 @@ func (o *Observer) ChangeLod(lod int32) {
 
 // 指定实体对玩家是否可见
 func (o *Observer) IsVisible(unit Unit) bool {
-	return false
+	// observerOwner := NewPlayerOwner(o.Id)
+	// relation := GetOwnerRelation(observerOwner, unit.GetOwner())
+	return true
 }

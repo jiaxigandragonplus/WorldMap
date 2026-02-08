@@ -62,9 +62,24 @@ func (wm *WorldMap) GetVisibleUnits(playerId int64, rect *geo.Rectangle) map[int
 		return retUnits
 	}
 
+	wm.gridMgr.RangeRectUnits(rect, true, func(unit Unit) bool {
+		if observer.IsVisible(unit) {
+			retUnits[unit.GetId()] = unit
+		}
+		return true
+	})
+	marchingUnits := wm.observerMgr.GetMarchingUnits(playerId, rect)
+	for _, unit := range marchingUnits {
+		retUnits[unit.GetId()] = unit
+	}
+
 	return retUnits
 }
 
 func (wm *WorldMap) GetConfig() *config.MapConfig {
 	return wm.mapConfig
+}
+
+func (wm *WorldMap) GetMapSize() *config.MapSize {
+	return wm.mapConfig.MapSize
 }
