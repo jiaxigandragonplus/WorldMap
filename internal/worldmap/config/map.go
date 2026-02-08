@@ -20,16 +20,20 @@ const (
 	RefreshStrategy_Random                             // 随机恢复
 )
 
+type MapSize struct {
+	Width      int32 // 地图宽度（世界单位）
+	Height     int32 // 地图高度（世界单位）
+	GridWidth  int32 // grid宽度
+	GridHeight int32 // grad高度
+}
+
 // slg地图配置
 type MapConfig struct {
-	MapID              int32  // 地图唯一ID
-	MapName            string // 地图名称
-	Width              int32  // 地图宽度（世界单位）
-	Height             int32  // 地图高度（世界单位）
-	GridWidth          int32  // grid宽度
-	GridHeight         int32  // grad高度
-	DefaultVisionRange int32  // 默认视野范围（网格数）
-	MaxPlayers         int32  // 最大玩家数量
+	MapID              int32    // 地图唯一ID
+	MapName            string   // 地图名称
+	MapSize            *MapSize // 地图大小
+	DefaultVisionRange int32    // 默认视野范围（网格数）
+	MaxPlayers         int32    // 最大玩家数量
 
 	// 出生点配置
 	SpawnPoints []SpawnPointConfig // 出生点列表

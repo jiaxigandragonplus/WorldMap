@@ -32,11 +32,11 @@ func (om *ObserverManager) AddObserver(playerId int64, viewWindow *geo.Rectangle
 // 地图划分后的最大单边视口数量
 func (om *ObserverManager) GetMaxViewSize() (int32, int32) {
 	mapConfig := om.worldMap.GetConfig()
-	return (mapConfig.Width - 1) / mapConfig.GridWidth, (mapConfig.Height - 1) / mapConfig.GridHeight
+	return (mapConfig.MapSize.Width - 1) / mapConfig.MapSize.GridWidth, (mapConfig.MapSize.Height - 1) / mapConfig.MapSize.GridHeight
 }
 
 // 坐标到视野索引
 func (om *ObserverManager) CoordToViewIndex(coord *geo.Coord) (int32, int32) {
 	mapConfig := om.worldMap.GetConfig()
-	return coord.X / mapConfig.GridWidth, coord.Y / mapConfig.GridHeight
+	return coord.X / mapConfig.MapSize.GridWidth, coord.Y / mapConfig.MapSize.GridHeight
 }

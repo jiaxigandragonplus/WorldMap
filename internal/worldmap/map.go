@@ -25,7 +25,7 @@ func NewWorldMap(config *config.MapConfig) *WorldMap {
 	newMap := &WorldMap{
 		id:        GetIDGenerator().GenerateNewID(),
 		mapConfig: config,
-		gridMgr:   NewGridManager(config.Width, config.Height, config.GridWidth, config.GridHeight),
+		gridMgr:   NewGridManager(config.MapSize),
 		unitMgr:   NewUnitManager(),
 		playerMgr: NewMapPlayerManager(),
 	}

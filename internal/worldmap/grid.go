@@ -1,6 +1,11 @@
 package worldmap
 
-import "github.com/GooLuck/WorldMap/internal/worldmap/geo"
+import (
+	"math"
+
+	"github.com/GooLuck/WorldMap/internal/worldmap/config"
+	"github.com/GooLuck/WorldMap/internal/worldmap/geo"
+)
 
 type Grid struct {
 	geo.Rectangle
@@ -55,4 +60,18 @@ func (g *Grid) RangeUnits(f func(unit Unit) bool) {
 			break
 		}
 	}
+}
+
+func MaxGridXY(mapSize *config.MapSize) (maxGridX, maxGridY int32) {
+	return (mapSize.Width - 1) / mapSize.GridWidth, (mapSize.Height - 1) / mapSize.GridHeight
+}
+
+// rect转grid
+func RectToGrid(mapSize *config.MapSize, rect *geo.Rectangle) (minGridX, maxGridX, minGridY, maxGridY int32) {
+	maxGridXTmp, maxGridYTmp := MaxGridXY(mapSize)
+	minGridX = int32(math.Max(float64(rect.X)/float64(mapSize.Width), 0))
+	maxGridX = int32(math.Min(float64(rect.X+rect.Width)/float64(mapSize.Width), float64(maxGridXTmp)))
+	minGridY = int32(math.Max(float64(rect.Y)/float64(mapSize.Height), 0))
+	maxGridY = int32(math.Min(float64(rect.Y+rect.Height)/float64(mapSize.Height), float64(maxGridYTmp)))
+	return
 }

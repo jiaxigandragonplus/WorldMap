@@ -1,43 +1,40 @@
 package worldmap
 
-import "github.com/GooLuck/WorldMap/internal/worldmap/geo"
+import (
+	"github.com/GooLuck/WorldMap/internal/worldmap/config"
+	"github.com/GooLuck/WorldMap/internal/worldmap/geo"
+)
 
 // grid管理器
 type GridManager struct {
-	grids      []*Grid // 网格数组（惰性初始化，nil表示未创建）
-	MapWidth   int32   // 地图的宽度（世界单位）
-	MapHeight  int32   // 地图的高度（世界单位）
-	GridWidth  int32   // 网格宽度（世界单位）
-	GridHeight int32   // 网格高度（世界单位）
-	gridCols   int32   // 网格列数
-	gridRows   int32   // 网格行数
+	grids    []*Grid // 网格数组（惰性初始化，nil表示未创建）
+	mapSize  *config.MapSize
+	gridCols int32 // 网格列数
+	gridRows int32 // 网格行数
 }
 
-func NewGridManager(width, height, gridWidth, gridHeight int32) *GridManager {
+func NewGridManager(mapSize *config.MapSize) *GridManager {
 	// 计算网格数量
-	gridCols := (width + gridWidth - 1) / gridWidth
-	gridRows := (height + gridHeight - 1) / gridHeight
+	gridCols := (mapSize.Width + mapSize.GridWidth - 1) / mapSize.GridWidth
+	gridRows := (mapSize.Height + mapSize.GridHeight - 1) / mapSize.GridHeight
 	totalGrids := gridCols * gridRows
 
 	mgr := &GridManager{
-		grids:      make([]*Grid, totalGrids), // 预分配指针数组，所有元素为nil
-		MapWidth:   width,
-		MapHeight:  height,
-		GridWidth:  gridWidth,
-		GridHeight: gridHeight,
-		gridCols:   gridCols,
-		gridRows:   gridRows,
+		grids:    make([]*Grid, totalGrids), // 预分配指针数组，所有元素为nil
+		mapSize:  mapSize,
+		gridCols: gridCols,
+		gridRows: gridRows,
 	}
 	return mgr
 }
 
 // 计算网格索引
 func (gm *GridManager) calcGridIndex(x, y int32) (int32, bool) {
-	if x < 0 || x >= gm.MapWidth || y < 0 || y >= gm.MapHeight {
+	if x < 0 || x >= gm.mapSize.Width || y < 0 || y >= gm.mapSize.Height {
 		return -1, false
 	}
-	gridX := x / gm.GridWidth
-	gridY := y / gm.GridHeight
+	gridX := x / gm.mapSize.GridWidth
+	gridY := y / gm.mapSize.GridHeight
 	index := gridY*gm.gridCols + gridX
 	return index, true
 }
@@ -52,13 +49,13 @@ func (gm *GridManager) GetGridByPos(x, y int32) *Grid {
 	// 惰性初始化：如果格子为nil则创建
 	if gm.grids[index] == nil {
 		// 计算格子的世界坐标
-		gridX := (x / gm.GridWidth) * gm.GridWidth
-		gridY := (y / gm.GridHeight) * gm.GridHeight
+		gridX := (x / gm.mapSize.GridWidth) * gm.mapSize.GridWidth
+		gridY := (y / gm.mapSize.GridHeight) * gm.mapSize.GridHeight
 
 		gm.grids[index] = NewGrid(
 			geo.NewCoord(gridX, gridY),
-			gm.GridWidth,
-			gm.GridHeight,
+			gm.mapSize.GridWidth,
+			gm.mapSize.GridHeight,
 		)
 	}
 
@@ -139,5 +136,14 @@ func (mgr *GridManager) GetRectUnits(rect *geo.Rectangle, align bool) []Unit {
 
 // 遍历矩形范围内的单位
 func (mgr *GridManager) RangeRectUnits(rect *geo.Rectangle, align bool, callback func(unit Unit) bool) {
+	leftX, rightX, leftY, rightY := RectToGrid(mgr.mapSize, rect)
 
+	for y := leftY; y <= rightY; y++ {
+		for x := leftX; x <= rightX; x++ {
+			grid := mgr.GetGridByPos(x, y)
+			if grid != nil {
+				grid.RangeUnits(callback)
+			}
+		}
+	}
 }
