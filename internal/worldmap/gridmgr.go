@@ -127,10 +127,43 @@ func (mgr *GridManager) UpdateInitCoord(unit Unit, coord *geo.Coord) {
 	}
 }
 
+// rect 是否与grid 对齐，对齐的话，就不用一个一个unit判断了，整个grid的unit都满足
+func (mgr *GridManager) isAlignGrid(rect *geo.Rectangle) bool {
+	return rect.X%mgr.mapSize.GridWidth == 0 &&
+		rect.Y%mgr.mapSize.GridHeight == 0 &&
+		rect.Width%mgr.mapSize.GridWidth == 0 &&
+		rect.Height%mgr.mapSize.GridHeight == 0
+}
+
 // 获取矩形范围内的单位
 func (mgr *GridManager) GetRectUnits(rect *geo.Rectangle, align bool) []Unit {
+	leftX, rightX, leftY, rightY := RectToGrid(mgr.mapSize, rect)
 	retUnits := make([]Unit, 0)
 
+	if !align && mgr.isAlignGrid(rect) {
+		align = true
+	}
+
+	for y := leftY; y <= rightY; y++ {
+		for x := leftX; x <= rightX; x++ {
+			grid := mgr.GetGridByPos(x, y)
+			if grid == nil {
+				continue
+			}
+
+			if align {
+				retUnits = append(retUnits, grid.GetUnits()...)
+				continue
+			}
+
+			gridUnits := grid.GetUnits()
+			for _, u := range gridUnits {
+				if rect.IsCoordInRect(u.GetCoord()) {
+					retUnits = append(retUnits, u)
+				}
+			}
+		}
+	}
 	return retUnits
 }
 
