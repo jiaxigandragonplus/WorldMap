@@ -12,6 +12,7 @@ type ResourceUnit struct {
 	id              int64
 	configId        int32
 	coord           geo.Coord
+	hexCoord        *geo.HexCoord
 	owner           *Owner
 	config          *config.EnhancedResourcePointConfig
 	lastHarvestTime time.Time
@@ -20,13 +21,14 @@ type ResourceUnit struct {
 	isActive        bool
 }
 
-// NewResourceUnit 创建新的资源点单位（指定ID）
+// NewResourceUnit 创建新的资源点单位（指定 ID）
 func NewResourceUnit(id int64, configId int32, coord geo.Coord, config *config.EnhancedResourcePointConfig) *ResourceUnit {
 	return &ResourceUnit{
 		id:              id,
 		configId:        configId,
 		coord:           coord,
-		owner:           NewOwner(0, OwnerType_System), // 系统所有
+		hexCoord:        geo.NewHexCoord(coord.X, coord.Y),
+		owner:           NewOwner(0, OwnerType_System),
 		config:          config,
 		currentAmount:   config.CurrentAmount,
 		isActive:        true,
@@ -35,7 +37,7 @@ func NewResourceUnit(id int64, configId int32, coord geo.Coord, config *config.E
 	}
 }
 
-// NewResourceUnitWithGeneratedID 创建新的资源点单位（自动生成ID）
+// NewResourceUnitWithGeneratedID 创建新的资源点单位（自动生成 ID）
 func NewResourceUnitWithGeneratedID(configId int32, coord geo.Coord, config *config.EnhancedResourcePointConfig) (*ResourceUnit, error) {
 	id := GetIDGenerator().GenerateNewID()
 
@@ -43,7 +45,8 @@ func NewResourceUnitWithGeneratedID(configId int32, coord geo.Coord, config *con
 		id:              id,
 		configId:        configId,
 		coord:           coord,
-		owner:           NewOwner(0, OwnerType_System), // 系统所有
+		hexCoord:        geo.NewHexCoord(coord.X, coord.Y),
+		owner:           NewOwner(0, OwnerType_System),
 		config:          config,
 		currentAmount:   config.CurrentAmount,
 		isActive:        true,
@@ -52,12 +55,12 @@ func NewResourceUnitWithGeneratedID(configId int32, coord geo.Coord, config *con
 	}, nil
 }
 
-// GetId 获取单位ID
+// GetId 获取单位 ID
 func (r *ResourceUnit) GetId() int64 {
 	return r.id
 }
 
-// GetConfigId 获取配置ID
+// GetConfigId 获取配置 ID
 func (r *ResourceUnit) GetConfigId() int32 {
 	return r.configId
 }
@@ -70,6 +73,16 @@ func (r *ResourceUnit) GetCoord() *geo.Coord {
 // SetCoord 设置坐标
 func (r *ResourceUnit) SetCoord(coord *geo.Coord) {
 	r.coord = *coord
+}
+
+// GetHexCoord 获取六边形坐标
+func (r *ResourceUnit) GetHexCoord() *geo.HexCoord {
+	return r.hexCoord
+}
+
+// SetHexCoord 设置六边形坐标
+func (r *ResourceUnit) SetHexCoord(coord *geo.HexCoord) {
+	r.hexCoord = coord
 }
 
 // GetType 获取单位类型
@@ -106,7 +119,6 @@ func (r *ResourceUnit) Harvest(amount int32) int32 {
 	r.currentAmount -= harvested
 	r.lastHarvestTime = time.Now()
 
-	// 如果资源被采空，根据配置处理
 	if r.currentAmount <= 0 {
 		r.currentAmount = 0
 		if r.config.PointType == config.ResourcePointType_RandomSpawn {
@@ -120,12 +132,9 @@ func (r *ResourceUnit) Harvest(amount int32) int32 {
 // Update 更新资源点状态
 func (r *ResourceUnit) Update(now time.Time) {
 	if !r.isActive {
-		// 检查是否需要重新激活（对于随机刷新点）
 		if r.config.PointType == config.ResourcePointType_RandomSpawn {
 			elapsed := now.Sub(r.lastHarvestTime).Seconds()
 			if int32(elapsed) >= r.config.SpawnInterval {
-				// 随机决定是否刷新
-				// 这里简化处理，实际应该使用随机数
 				r.isActive = true
 				r.currentAmount = r.config.MaxAmount
 				r.lastRefreshTime = now
@@ -134,16 +143,13 @@ func (r *ResourceUnit) Update(now time.Time) {
 		return
 	}
 
-	// 检查时间限制
 	if !r.isInActiveTime(now) {
 		return
 	}
 
-	// 恢复资源
 	if r.currentAmount < r.config.MaxAmount {
 		elapsed := now.Sub(r.lastHarvestTime).Seconds()
 		if int32(elapsed) >= r.config.RegenDelay {
-			// 根据策略计算恢复量
 			regenAmount := r.calculateRegenAmount(now)
 			r.currentAmount += regenAmount
 			if r.currentAmount > r.config.MaxAmount {
@@ -155,7 +161,6 @@ func (r *ResourceUnit) Update(now time.Time) {
 
 // isInActiveTime 检查当前时间是否在活跃时间内
 func (r *ResourceUnit) isInActiveTime(now time.Time) bool {
-	// 检查月份
 	if len(r.config.SeasonMonths) > 0 {
 		currentMonth := int32(now.Month())
 		found := false
@@ -170,7 +175,6 @@ func (r *ResourceUnit) isInActiveTime(now time.Time) bool {
 		}
 	}
 
-	// 检查小时
 	if len(r.config.ActiveHours) >= 2 {
 		currentHour := int32(now.Hour())
 		if currentHour < r.config.ActiveHours[0] || currentHour > r.config.ActiveHours[1] {
@@ -187,30 +191,21 @@ func (r *ResourceUnit) calculateRegenAmount(now time.Time) int32 {
 
 	switch r.config.RefreshStrategy {
 	case config.RefreshStrategy_Linear:
-		// 线性恢复：每秒恢复 RegenRate
 		return int32(elapsed * float64(r.config.RegenRate))
-
 	case config.RefreshStrategy_Exponential:
-		// 指数恢复：恢复速率随时间增加
 		baseRate := float64(r.config.RegenRate)
-		exponentialFactor := 1.0 + (elapsed / 3600.0) // 每小时增加1倍
+		exponentialFactor := 1.0 + (elapsed / 3600.0)
 		return int32(elapsed * baseRate * exponentialFactor)
-
 	case config.RefreshStrategy_Stepwise:
-		// 阶梯式恢复：每间隔一段时间恢复固定量
 		interval := float64(r.config.RegenDelay)
 		if interval <= 0 {
-			interval = 300 // 默认5分钟
+			interval = 300
 		}
 		steps := int32(elapsed / interval)
 		return steps * int32(r.config.RegenRate*float32(interval))
-
 	case config.RefreshStrategy_Random:
-		// 随机恢复：在0到最大恢复量之间随机
 		maxRegen := int32(elapsed * float64(r.config.RegenRate) * 2)
-		// 这里简化处理，实际应该使用随机数
 		return maxRegen / 2
-
 	default:
 		return int32(elapsed * float64(r.config.RegenRate))
 	}
@@ -222,7 +217,6 @@ func (r *ResourceUnit) CanBeHarvestedBy(playerLevel int32, faction string) bool 
 		return false
 	}
 
-	// 检查等级限制
 	if r.config.MinPlayerLevel > 0 && playerLevel < r.config.MinPlayerLevel {
 		return false
 	}
@@ -230,7 +224,6 @@ func (r *ResourceUnit) CanBeHarvestedBy(playerLevel int32, faction string) bool 
 		return false
 	}
 
-	// 检查阵营限制
 	if r.config.FactionRestrict != "" && r.config.FactionRestrict != faction {
 		return false
 	}

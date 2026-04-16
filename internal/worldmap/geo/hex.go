@@ -1,6 +1,7 @@
 package geo
 
 import (
+	"fmt"
 	"math"
 )
 
@@ -69,6 +70,29 @@ func (h *HexCoord) DistanceTo(other *HexCoord) int32 {
 	dr := abs(h.R - other.R)
 	ds := abs(h.S() - other.S())
 	return (dq + dr + ds) / 2
+}
+
+// Equal 检查两个六边形坐标是否相等
+func (h *HexCoord) Equal(other *HexCoord) bool {
+	if other == nil {
+		return false
+	}
+	return h.Q == other.Q && h.R == other.R
+}
+
+// Hash 计算六边形坐标的哈希值
+func (h *HexCoord) Hash() uint64 {
+	return hashHex(h.Q, h.R)
+}
+
+// Clone 克隆六边形坐标
+func (h *HexCoord) Clone() *HexCoord {
+	return NewHexCoord(h.Q, h.R)
+}
+
+// String 返回六边形坐标的字符串表示
+func (h *HexCoord) String() string {
+	return fmt.Sprintf("Hex(%d, %d, %d)", h.Q, h.R, h.S())
 }
 
 // abs 绝对值函数
@@ -186,6 +210,11 @@ func NewHexRectangle(minQ, maxQ, minR, maxR int32) *HexRectangle {
 		MinR: minR,
 		MaxR: maxR,
 	}
+}
+
+// hashHex 计算六边形坐标的哈希值，将两个 int32 编码为 uint64
+func hashHex(q, r int32) uint64 {
+	return (uint64(q) << 32) | uint64(uint32(r))
 }
 
 // Contains 检查坐标是否在范围内

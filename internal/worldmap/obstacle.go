@@ -12,6 +12,7 @@ type ObstacleUnit struct {
 	id       int64
 	configId int32
 	coord    geo.Coord
+	hexCoord *geo.HexCoord
 	width    int32
 	height   int32
 	owner    *Owner
@@ -27,10 +28,14 @@ func NewObstacleUnit(id int64, configId int32, coord geo.Coord, width, height in
 		Height: height,
 	}
 
+	// 根据矩形坐标计算六边形坐标（假设原点在左上角）
+	hexCoord := geo.NewHexCoord(coord.X, coord.Y)
+
 	return &ObstacleUnit{
 		id:       id,
 		configId: configId,
 		coord:    coord,
+		hexCoord: hexCoord,
 		width:    width,
 		height:   height,
 		owner:    NewOwner(0, OwnerType_System), // 系统所有
@@ -59,6 +64,16 @@ func (o *ObstacleUnit) SetCoord(coord *geo.Coord) {
 	o.coord = *coord
 	// 更新矩形区域
 	o.rect.Coord = *coord
+}
+
+// GetHexCoord 获取六边形坐标
+func (o *ObstacleUnit) GetHexCoord() *geo.HexCoord {
+	return o.hexCoord
+}
+
+// SetHexCoord 设置六边形坐标
+func (o *ObstacleUnit) SetHexCoord(coord *geo.HexCoord) {
+	o.hexCoord = coord
 }
 
 // GetType 获取单位类型
